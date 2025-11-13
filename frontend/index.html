@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar & Todo App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📅 Calendar & Todo App</h1>
+            <p class="subtitle">Manage your tasks and events in one place</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Tasks Section -->
+            <section class="tasks-section">
+                <div class="section-header">
+                    <h2>✓ Tasks</h2>
+                    <button class="btn btn-primary" onclick="showTaskModal()">+ Add Task</button>
+                </div>
+
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterTasks('all')">All</button>
+                    <button class="filter-btn" onclick="filterTasks('active')">Active</button>
+                    <button class="filter-btn" onclick="filterTasks('completed')">Completed</button>
+                </div>
+
+                <div id="tasksList" class="items-list">
+                    <p class="empty-state">No tasks yet. Create one to get started!</p>
+                </div>
+            </section>
+
+            <!-- Events Section -->
+            <section class="events-section">
+                <div class="section-header">
+                    <h2>📆 Calendar Events</h2>
+                    <button class="btn btn-primary" onclick="showEventModal()">+ Add Event</button>
+                </div>
+
+                <div id="eventsList" class="items-list">
+                    <p class="empty-state">No events scheduled. Add one to your calendar!</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Task</h3>
+                <button class="close-btn" onclick="closeTaskModal()">&times;</button>
+            </div>
+            <form id="taskForm" onsubmit="createTask(event)">
+                <div class="form-group">
+                    <label for="taskTitle">Title *</label>
+                    <input type="text" id="taskTitle" required maxlength="200">
+                </div>
+                <div class="form-group">
+                    <label for="taskDescription">Description</label>
+                    <textarea id="taskDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="taskDueDate">Due Date</label>
+                    <input type="datetime-local" id="taskDueDate">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeTaskModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Event Modal -->
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Event</h3>
+                <button class="close-btn" onclick="closeEventModal()">&times;</button>
+            </div>
+            <form id="eventForm" onsubmit="createEvent(event)">
+                <div class="form-group">
+                    <label for="eventTitle">Title *</label>
+                    <input type="text" id="eventTitle" required maxlength="200">
+                </div>
+                <div class="form-group">
+                    <label for="eventDescription">Description</label>
+                    <textarea id="eventDescription" rows="3"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eventStartTime">Start Time *</label>
+                        <input type="datetime-local" id="eventStartTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="eventEndTime">End Time *</label>
+                        <input type="datetime-local" id="eventEndTime" required>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

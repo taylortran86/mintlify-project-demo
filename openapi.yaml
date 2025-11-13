@@ -1,0 +1,507 @@
+openapi: 3.1.0
+info:
+  title: Calendar & Todo API
+  description: A simple API for managing tasks and calendar events
+  version: 1.0.0
+paths:
+  /:
+    get:
+      summary: Root
+      description: Root endpoint that returns API information.
+      operationId: root__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/health:
+    get:
+      summary: Health Check
+      description: Health check endpoint to verify the API is running.
+      operationId: health_check_api_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/tasks:
+    post:
+      summary: Create Task
+      description: "Create a new task.\n\nArgs:\n    task: Task data including title,\
+        \ description, and optional due date\n    db: Database session\n\nReturns:\n\
+        \    The created task with its assigned ID"
+      operationId: create_task_api_tasks_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      summary: Get Tasks
+      description: "Retrieve all tasks, optionally filtered by completion status.\n\
+        \nArgs:\n    completed: Optional filter - True for completed, False for incomplete,\
+        \ None for all\n    db: Database session\n\nReturns:\n    List of tasks matching\
+        \ the filter criteria"
+      operationId: get_tasks_api_tasks_get
+      parameters:
+      - name: completed
+        in: query
+        required: false
+        schema:
+          type: boolean
+          title: Completed
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ItemResponse'
+                title: Response Get Tasks Api Tasks Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/tasks/{task_id}:
+    get:
+      summary: Get Task
+      description: "Retrieve a specific task by ID.\n\nArgs:\n    task_id: The unique\
+        \ identifier of the task\n    db: Database session\n\nReturns:\n    The requested\
+        \ task\n\nRaises:\n    HTTPException: 404 if task is not found"
+      operationId: get_task_api_tasks__task_id__get
+      parameters:
+      - name: task_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Task Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    patch:
+      summary: Update Task
+      description: "Update an existing task.\n\nArgs:\n    task_id: The unique identifier\
+        \ of the task to update\n    task_update: Fields to update (only provided\
+        \ fields will be updated)\n    db: Database session\n\nReturns:\n    The updated\
+        \ task\n\nRaises:\n    HTTPException: 404 if task is not found"
+      operationId: update_task_api_tasks__task_id__patch
+      parameters:
+      - name: task_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Task Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      summary: Delete Task
+      description: "Delete a task.\n\nArgs:\n    task_id: The unique identifier of\
+        \ the task to delete\n    db: Database session\n\nRaises:\n    HTTPException:\
+        \ 404 if task is not found"
+      operationId: delete_task_api_tasks__task_id__delete
+      parameters:
+      - name: task_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Task Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/events:
+    post:
+      summary: Create Event
+      description: "Create a new calendar event.\n\nArgs:\n    event: Event data including\
+        \ title, description, start time, and end time\n    db: Database session\n\
+        \nReturns:\n    The created event with its assigned ID\n\nRaises:\n    HTTPException:\
+        \ 400 if end time is before start time"
+      operationId: create_event_api_events_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      summary: Get Events
+      description: "Retrieve all calendar events, optionally filtered by date range.\n\
+        \nArgs:\n    start_date: Optional - only return events starting on or after\
+        \ this date\n    end_date: Optional - only return events starting on or before\
+        \ this date\n    db: Database session\n\nReturns:\n    List of events matching\
+        \ the filter criteria"
+      operationId: get_events_api_events_get
+      parameters:
+      - name: start_date
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+          title: Start Date
+      - name: end_date
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date-time
+          title: End Date
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ItemResponse'
+                title: Response Get Events Api Events Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/events/{event_id}:
+    get:
+      summary: Get Event
+      description: "Retrieve a specific event by ID.\n\nArgs:\n    event_id: The unique\
+        \ identifier of the event\n    db: Database session\n\nReturns:\n    The requested\
+        \ event\n\nRaises:\n    HTTPException: 404 if event is not found"
+      operationId: get_event_api_events__event_id__get
+      parameters:
+      - name: event_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Event Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    patch:
+      summary: Update Event
+      description: "Update an existing event.\n\nArgs:\n    event_id: The unique identifier\
+        \ of the event to update\n    event_update: Fields to update (only provided\
+        \ fields will be updated)\n    db: Database session\n\nReturns:\n    The updated\
+        \ event\n\nRaises:\n    HTTPException: 404 if event is not found\n    HTTPException:\
+        \ 400 if updated times are invalid"
+      operationId: update_event_api_events__event_id__patch
+      parameters:
+      - name: event_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Event Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      summary: Delete Event
+      description: "Delete an event.\n\nArgs:\n    event_id: The unique identifier\
+        \ of the event to delete\n    db: Database session\n\nRaises:\n    HTTPException:\
+        \ 404 if event is not found"
+      operationId: delete_event_api_events__event_id__delete
+      parameters:
+      - name: event_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Event Id
+      responses:
+        '204':
+          description: Successful Response
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    EventCreate:
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Title
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          default: ''
+        item_type:
+          $ref: '#/components/schemas/ItemType'
+          default: event
+        start_time:
+          type: string
+          format: date-time
+          title: Start Time
+        end_time:
+          type: string
+          format: date-time
+          title: End Time
+      type: object
+      required:
+      - title
+      - start_time
+      - end_time
+      title: EventCreate
+      description: Schema for creating a new calendar event.
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ItemResponse:
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Title
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          default: ''
+        item_type:
+          $ref: '#/components/schemas/ItemType'
+        id:
+          type: integer
+          title: Id
+        completed:
+          type: boolean
+          title: Completed
+        due_date:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Due Date
+        start_time:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Start Time
+        end_time:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: End Time
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      type: object
+      required:
+      - title
+      - item_type
+      - id
+      - completed
+      - due_date
+      - start_time
+      - end_time
+      - created_at
+      title: ItemResponse
+      description: Schema for item responses.
+    ItemType:
+      type: string
+      enum:
+      - task
+      - event
+      title: ItemType
+      description: Enum for distinguishing between tasks and events.
+    ItemUpdate:
+      properties:
+        title:
+          anyOf:
+          - type: string
+            maxLength: 200
+            minLength: 1
+          - type: 'null'
+          title: Title
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        completed:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Completed
+        due_date:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Due Date
+        start_time:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Start Time
+        end_time:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: End Time
+      type: object
+      title: ItemUpdate
+      description: Schema for updating an existing item.
+    TaskCreate:
+      properties:
+        title:
+          type: string
+          maxLength: 200
+          minLength: 1
+          title: Title
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          default: ''
+        item_type:
+          $ref: '#/components/schemas/ItemType'
+          default: task
+        due_date:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Due Date
+      type: object
+      required:
+      - title
+      title: TaskCreate
+      description: Schema for creating a new task.
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
