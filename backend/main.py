@@ -70,7 +70,29 @@ For support, contact support@example.com or visit our [documentation](https://do
     license_info={
         "name": "MIT",
         "url": "https://opensource.org/licenses/MIT"
-    }
+    },
+    openapi_tags=[
+        {
+            "name": "API Keys",
+            "description": "Manage API keys for authentication. Create, list, retrieve, and revoke API keys with specific scopes and expiration dates."
+        },
+        {
+            "name": "Webhooks",
+            "description": "Configure webhook subscriptions for real-time event notifications. Receive HTTP POST requests when tasks and events are created, updated, or deleted."
+        },
+        {
+            "name": "Analytics",
+            "description": "Access usage analytics and statistics. Track task completion rates, event scheduling patterns, and API consumption metrics."
+        },
+        {
+            "name": "Account",
+            "description": "Retrieve account information, subscription details, and API quota usage."
+        },
+        {
+            "name": "Health",
+            "description": "API health check and status monitoring endpoints."
+        }
+    ]
 )
 
 # Include the public API router

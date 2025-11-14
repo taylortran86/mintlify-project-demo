@@ -18,7 +18,7 @@
     "/v1/api-keys": {
       "get": {
         "tags": [
-          "Public API"
+          "API Keys"
         ],
         "summary": "List Api Keys",
         "description": "List all API keys for your account.\n\nReturns a list of all API keys associated with your account. The full key values\nare never returned - only the key prefix for identification.\n\nReturns:\n    ApiKeyListResponse: List of API keys with metadata",
@@ -38,7 +38,7 @@
       },
       "post": {
         "tags": [
-          "Public API"
+          "API Keys"
         ],
         "summary": "Create Api Key",
         "description": "Create a new API key for authentication.\n\nAPI keys are used to authenticate requests to the API. Each key can have specific\nscopes that control what operations it can perform.\n\n**Important**: The full API key is only returned once upon creation. Store it securely.\n\nArgs:\n    key_data: API key configuration including name, scopes, and expiration\n\nReturns:\n    ApiKeyResponse: The created API key with full key value (only shown once)\n\nExample:\n    ```json\n    {\n      \"name\": \"Production API Key\",\n      \"scopes\": [\"read\", \"write\"],\n      \"expires_at\": \"2025-12-31T23:59:59Z\"\n    }\n    ```",
@@ -80,7 +80,7 @@
     "/v1/api-keys/{key_id}": {
       "get": {
         "tags": [
-          "Public API"
+          "API Keys"
         ],
         "summary": "Get Api Key",
         "description": "Get details of a specific API key.\n\nRetrieve information about a specific API key including its scopes, expiration,\nand last usage time.\n\nArgs:\n    key_id: The unique identifier of the API key\n\nReturns:\n    ApiKeyResponse: API key details\n\nRaises:\n    HTTPException: 404 if API key not found",
@@ -121,7 +121,7 @@
       },
       "delete": {
         "tags": [
-          "Public API"
+          "API Keys"
         ],
         "summary": "Revoke Api Key",
         "description": "Revoke an API key.\n\nPermanently revokes an API key. This action cannot be undone. Any requests\nusing this key will be rejected immediately.\n\nArgs:\n    key_id: The unique identifier of the API key to revoke\n\nReturns:\n    SuccessResponse: Confirmation of revocation\n\nRaises:\n    HTTPException: 404 if API key not found",
@@ -164,7 +164,7 @@
     "/v1/webhooks": {
       "get": {
         "tags": [
-          "Public API"
+          "Webhooks"
         ],
         "summary": "List Webhooks",
         "description": "List all webhooks for your account.\n\nReturns a list of all webhook subscriptions configured for your account.\n\nReturns:\n    WebhookListResponse: List of webhook configurations",
@@ -184,7 +184,7 @@
       },
       "post": {
         "tags": [
-          "Public API"
+          "Webhooks"
         ],
         "summary": "Create Webhook",
         "description": "Create a new webhook subscription.\n\nWebhooks allow you to receive real-time notifications when events occur in your account.\nWhen a subscribed event occurs, we'll send a POST request to your specified URL.\n\n**Webhook Payload Format:**\n```json\n{\n  \"event\": \"task.created\",\n  \"timestamp\": \"2025-11-13T10:30:00Z\",\n  \"data\": { ... event-specific data ... }\n}\n```\n\nArgs:\n    webhook_data: Webhook configuration including URL and event subscriptions\n\nReturns:\n    WebhookResponse: The created webhook configuration\n\nExample:\n    ```json\n    {\n      \"url\": \"https://example.com/webhooks/calendar\",\n      \"events\": [\"task.created\", \"task.completed\"],\n      \"description\": \"Notify task management system\"\n    }\n    ```",
@@ -226,7 +226,7 @@
     "/v1/webhooks/{webhook_id}": {
       "get": {
         "tags": [
-          "Public API"
+          "Webhooks"
         ],
         "summary": "Get Webhook",
         "description": "Get details of a specific webhook.\n\nRetrieve configuration and status information for a specific webhook subscription.\n\nArgs:\n    webhook_id: The unique identifier of the webhook\n\nReturns:\n    WebhookResponse: Webhook configuration details\n\nRaises:\n    HTTPException: 404 if webhook not found",
@@ -267,7 +267,7 @@
       },
       "patch": {
         "tags": [
-          "Public API"
+          "Webhooks"
         ],
         "summary": "Update Webhook",
         "description": "Update a webhook configuration.\n\nModify the URL, events, or active status of an existing webhook subscription.\n\nArgs:\n    webhook_id: The unique identifier of the webhook\n    webhook_update: Fields to update\n\nReturns:\n    WebhookResponse: Updated webhook configuration\n\nRaises:\n    HTTPException: 404 if webhook not found",
@@ -318,7 +318,7 @@
       },
       "delete": {
         "tags": [
-          "Public API"
+          "Webhooks"
         ],
         "summary": "Delete Webhook",
         "description": "Delete a webhook subscription.\n\nPermanently removes a webhook subscription. You will no longer receive\nnotifications for the subscribed events.\n\nArgs:\n    webhook_id: The unique identifier of the webhook\n\nReturns:\n    SuccessResponse: Confirmation of deletion\n\nRaises:\n    HTTPException: 404 if webhook not found",
@@ -361,7 +361,7 @@
     "/v1/analytics": {
       "get": {
         "tags": [
-          "Public API"
+          "Analytics"
         ],
         "summary": "Get Analytics",
         "description": "Get usage analytics and statistics.\n\nRetrieve detailed analytics about your API usage, task/event activity, and\noverall account metrics.\n\n**Available Periods:**\n- `last_7_days` - Past week\n- `last_30_days` - Past month (default)\n- `last_90_days` - Past quarter\n- `current_month` - Current calendar month\n\nArgs:\n    period: Time period for analytics (default: \"last_30_days\")\n\nReturns:\n    AnalyticsResponse: Comprehensive analytics data\n\nExample Response:\n    ```json\n    {\n      \"account_id\": \"acc_123456\",\n      \"generated_at\": \"2025-11-13T10:30:00Z\",\n      \"usage\": {\n        \"tasks_created\": 145,\n        \"tasks_completed\": 98,\n        \"events_created\": 67,\n        \"api_calls\": 1523\n      }\n    }\n    ```",
@@ -405,7 +405,7 @@
     "/v1/analytics/usage": {
       "get": {
         "tags": [
-          "Public API"
+          "Analytics"
         ],
         "summary": "Get Usage Stats",
         "description": "Get API usage statistics.\n\nRetrieve specific usage metrics for tasks, events, and API calls over a given period.\nThis endpoint is useful for monitoring your API quota and usage patterns.\n\nArgs:\n    period: Time period for statistics (default: \"last_30_days\")\n\nReturns:\n    UsageStats: Usage statistics for the specified period",
@@ -449,7 +449,7 @@
     "/v1/account": {
       "get": {
         "tags": [
-          "Public API"
+          "Account"
         ],
         "summary": "Get Account Info",
         "description": "Get account information and subscription details.\n\nRetrieve information about your account including subscription plan,\nAPI quota, and usage limits.\n\nReturns:\n    AccountInfo: Account details and subscription information",
@@ -471,7 +471,7 @@
     "/v1/health": {
       "get": {
         "tags": [
-          "Public API"
+          "Health"
         ],
         "summary": "Public Api Health",
         "description": "Health check endpoint for the public API.\n\nUse this endpoint to verify that the API is operational and responding to requests.\n\nReturns:\n    dict: API health status and version information",
@@ -1065,5 +1065,27 @@
         "description": "Schema for updating a webhook."
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "API Keys",
+      "description": "Manage API keys for authentication. Create, list, retrieve, and revoke API keys with specific scopes and expiration dates."
+    },
+    {
+      "name": "Webhooks",
+      "description": "Configure webhook subscriptions for real-time event notifications. Receive HTTP POST requests when tasks and events are created, updated, or deleted."
+    },
+    {
+      "name": "Analytics",
+      "description": "Access usage analytics and statistics. Track task completion rates, event scheduling patterns, and API consumption metrics."
+    },
+    {
+      "name": "Account",
+      "description": "Retrieve account information, subscription details, and API quota usage."
+    },
+    {
+      "name": "Health",
+      "description": "API health check and status monitoring endpoints."
+    }
+  ]
 }

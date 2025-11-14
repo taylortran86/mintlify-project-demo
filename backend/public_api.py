@@ -24,7 +24,7 @@ from .api_schemas import (
     WebhookEvent,
 )
 
-router = APIRouter(prefix="/v1", tags=["Public API"])
+router = APIRouter(prefix="/v1")
 
 # In-memory storage for demo purposes (would be a database in production)
 api_keys_db = {}
@@ -62,7 +62,7 @@ def verify_api_key(authorization: Optional[str] = Header(None)) -> dict:
 
 
 # API Key Management Endpoints
-@router.post("/api-keys", response_model=ApiKeyResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/api-keys", response_model=ApiKeyResponse, status_code=status.HTTP_201_CREATED, tags=["API Keys"])
 def create_api_key(key_data: ApiKeyCreate) -> ApiKeyResponse:
     """
     Create a new API key for authentication.
@@ -113,7 +113,7 @@ def create_api_key(key_data: ApiKeyCreate) -> ApiKeyResponse:
     return key_response
 
 
-@router.get("/api-keys", response_model=ApiKeyListResponse)
+@router.get("/api-keys", response_model=ApiKeyListResponse, tags=["API Keys"])
 def list_api_keys() -> ApiKeyListResponse:
     """
     List all API keys for your account.
@@ -132,7 +132,7 @@ def list_api_keys() -> ApiKeyListResponse:
     return ApiKeyListResponse(keys=keys, total=len(keys))
 
 
-@router.get("/api-keys/{key_id}", response_model=ApiKeyResponse)
+@router.get("/api-keys/{key_id}", response_model=ApiKeyResponse, tags=["API Keys"])
 def get_api_key(key_id: str) -> ApiKeyResponse:
     """
     Get details of a specific API key.
@@ -155,7 +155,7 @@ def get_api_key(key_id: str) -> ApiKeyResponse:
     return ApiKeyResponse(**api_keys_db[key_id])
 
 
-@router.delete("/api-keys/{key_id}", response_model=SuccessResponse)
+@router.delete("/api-keys/{key_id}", response_model=SuccessResponse, tags=["API Keys"])
 def revoke_api_key(key_id: str) -> SuccessResponse:
     """
     Revoke an API key.
@@ -180,7 +180,7 @@ def revoke_api_key(key_id: str) -> SuccessResponse:
 
 
 # Webhook Management Endpoints
-@router.post("/webhooks", response_model=WebhookResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/webhooks", response_model=WebhookResponse, status_code=status.HTTP_201_CREATED, tags=["Webhooks"])
 def create_webhook(webhook_data: WebhookCreate) -> WebhookResponse:
     """
     Create a new webhook subscription.
@@ -228,7 +228,7 @@ def create_webhook(webhook_data: WebhookCreate) -> WebhookResponse:
     return webhook
 
 
-@router.get("/webhooks", response_model=WebhookListResponse)
+@router.get("/webhooks", response_model=WebhookListResponse, tags=["Webhooks"])
 def list_webhooks() -> WebhookListResponse:
     """
     List all webhooks for your account.
@@ -242,7 +242,7 @@ def list_webhooks() -> WebhookListResponse:
     return WebhookListResponse(webhooks=webhooks, total=len(webhooks))
 
 
-@router.get("/webhooks/{webhook_id}", response_model=WebhookResponse)
+@router.get("/webhooks/{webhook_id}", response_model=WebhookResponse, tags=["Webhooks"])
 def get_webhook(webhook_id: str) -> WebhookResponse:
     """
     Get details of a specific webhook.
@@ -264,7 +264,7 @@ def get_webhook(webhook_id: str) -> WebhookResponse:
     return WebhookResponse(**webhooks_db[webhook_id])
 
 
-@router.patch("/webhooks/{webhook_id}", response_model=WebhookResponse)
+@router.patch("/webhooks/{webhook_id}", response_model=WebhookResponse, tags=["Webhooks"])
 def update_webhook(webhook_id: str, webhook_update: WebhookUpdate) -> WebhookResponse:
     """
     Update a webhook configuration.
@@ -296,7 +296,7 @@ def update_webhook(webhook_id: str, webhook_update: WebhookUpdate) -> WebhookRes
     return WebhookResponse(**webhook)
 
 
-@router.delete("/webhooks/{webhook_id}", response_model=SuccessResponse)
+@router.delete("/webhooks/{webhook_id}", response_model=SuccessResponse, tags=["Webhooks"])
 def delete_webhook(webhook_id: str) -> SuccessResponse:
     """
     Delete a webhook subscription.
@@ -321,7 +321,7 @@ def delete_webhook(webhook_id: str) -> SuccessResponse:
 
 
 # Analytics & Reporting Endpoints
-@router.get("/analytics", response_model=AnalyticsResponse)
+@router.get("/analytics", response_model=AnalyticsResponse, tags=["Analytics"])
 def get_analytics(
     period: str = "last_30_days"
 ) -> AnalyticsResponse:
@@ -380,7 +380,7 @@ def get_analytics(
     )
 
 
-@router.get("/analytics/usage", response_model=UsageStats)
+@router.get("/analytics/usage", response_model=UsageStats, tags=["Analytics"])
 def get_usage_stats(period: str = "last_30_days") -> UsageStats:
     """
     Get API usage statistics.
@@ -406,7 +406,7 @@ def get_usage_stats(period: str = "last_30_days") -> UsageStats:
 
 
 # Account Information Endpoints
-@router.get("/account", response_model=AccountInfo)
+@router.get("/account", response_model=AccountInfo, tags=["Account"])
 def get_account_info() -> AccountInfo:
     """
     Get account information and subscription details.
@@ -428,7 +428,7 @@ def get_account_info() -> AccountInfo:
 
 
 # Health Check for Public API
-@router.get("/health")
+@router.get("/health", tags=["Health"])
 def public_api_health():
     """
     Health check endpoint for the public API.
