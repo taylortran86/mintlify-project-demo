@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: Calendar & Todo API
+  title: Mintie Calendar API
   description: A simple API for managing tasks and calendar events
   version: 1.0.0
 paths:

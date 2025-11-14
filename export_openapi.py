@@ -10,7 +10,7 @@ and saves it to a file. This is useful for:
 """
 import json
 import yaml
-from backend.main import app
+from backend.main import public_app  # Export the public API instead of internal routes
 
 
 def export_openapi_json(filename: str = "openapi.json"):
@@ -20,7 +20,7 @@ def export_openapi_json(filename: str = "openapi.json"):
     Args:
         filename: The output filename for the JSON schema
     """
-    openapi_schema = app.openapi()
+    openapi_schema = public_app.openapi()
     with open(filename, "w") as f:
         json.dump(openapi_schema, f, indent=2)
     print(f"OpenAPI schema exported to {filename}")
@@ -33,7 +33,7 @@ def export_openapi_yaml(filename: str = "openapi.yaml"):
     Args:
         filename: The output filename for the YAML schema
     """
-    openapi_schema = app.openapi()
+    openapi_schema = public_app.openapi()
     with open(filename, "w") as f:
         yaml.dump(openapi_schema, f, sort_keys=False, default_flow_style=False)
     print(f"OpenAPI schema exported to {filename}")

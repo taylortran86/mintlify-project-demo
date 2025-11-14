@@ -1,0 +1,1069 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Mintie Calendar API",
+    "description": "\n# Welcome to the Mintie Calendar API\n\nA powerful API for managing tasks and calendar events with webhooks, analytics, and more.\n\n## Authentication\n\nAll API requests require authentication using an API key. Include your API key in the `Authorization` header:\n\n```\nAuthorization: Bearer YOUR_API_KEY\n```\n\nGet your API key from the dashboard or create one using the `/v1/api-keys` endpoint.\n\n## Rate Limits\n\n- **Free Plan**: 1,000 requests/month\n- **Professional Plan**: 100,000 requests/month\n- **Enterprise Plan**: Unlimited\n\n## Webhooks\n\nSubscribe to real-time events using webhooks. See the webhooks section for configuration.\n\n## Support\n\nFor support, contact support@example.com or visit our [documentation](https://docs.example.com).\n    ",
+    "contact": {
+      "name": "API Support",
+      "url": "https://example.com/support",
+      "email": "support@example.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    },
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/v1/api-keys": {
+      "get": {
+        "tags": [
+          "Public API"
+        ],
+        "summary": "List Api Keys",
+        "description": "List all API keys for your account.\n\nReturns a list of all API keys associated with your account. The full key values\nare never returned - only the key prefix for identification.\n\nReturns:\n    ApiKeyListResponse: List of API keys with metadata",
+        "operationId": "list_api_keys_v1_api_keys_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Public API"
+        ],
+        "summary": "Create Api Key",
+        "description": "Create a new API key for authentication.\n\nAPI keys are used to authenticate requests to the API. Each key can have specific\nscopes that control what operations it can perform.\n\n**Important**: The full API key is only returned once upon creation. Store it securely.\n\nArgs:\n    key_data: API key configuration including name, scopes, and expiration\n\nReturns:\n    ApiKeyResponse: The created API key with full key value (only shown once)\n\nExample:\n    ```json\n    {\n      \"name\": \"Production API Key\",\n      \"scopes\": [\"read\", \"write\"],\n      \"expires_at\": \"2025-12-31T23:59:59Z\"\n    }\n    ```",
+        "operationId": "create_api_key_v1_api_keys_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApiKeyCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/api-keys/{key_id}": {
+      "get": {
+        "tags": [
+          "Public API"
+        ],
+        "summary": "Get Api Key",
+        "description": "Get details of a specific API key.\n\nRetrieve information about a specific API key including its scopes, expiration,\nand last usage time.\n\nArgs:\n    key_id: The unique identifier of the API key\n\nReturns:\n    ApiKeyResponse: API key details\n\nRaises:\n    HTTPException: 404 if API key not found",
+        "operationId": "get_api_key_v1_api_keys__key_id__get",
+        "parameters": [
+          {
+            "name": "key_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Public API"
+        ],
+        "summary": "Revoke Api Key",
+        "description": "Revoke an API key.\n\nPermanently revokes an API key. This action cannot be undone. Any requests\nusing this key will be rejected immediately.\n\nArgs:\n    key_id: The unique identifier of the API key to revoke\n\nReturns:\n    SuccessResponse: Confirmation of revocation\n\nRaises:\n    HTTPException: 404 if API key not found",
+        "operationId": "revoke_api_key_v1_api_keys__key_id__delete",
+        "parameters": [
+          {
+            "name": "key_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks": {
+      "get": {
+        "tags": [
+          "Public API"
+        ],
+        "summary": "List Webhooks",
+        "description": "List all webhooks for your account.\n\nReturns a list of all webhook subscriptions configured for your account.\n\nReturns:\n    WebhookListResponse: List of webhook configurations",
+        "operationId": "list_webhooks_v1_webhooks_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Public API"
+        ],
+        "summary": "Create Webhook",
+        "description": "Create a new webhook subscription.\n\nWebhooks allow you to receive real-time notifications when events occur in your account.\nWhen a subscribed event occurs, we'll send a POST request to your specified URL.\n\n**Webhook Payload Format:**\n```json\n{\n  \"event\": \"task.created\",\n  \"timestamp\": \"2025-11-13T10:30:00Z\",\n  \"data\": { ... event-specific data ... }\n}\n```\n\nArgs:\n    webhook_data: Webhook configuration including URL and event subscriptions\n\nReturns:\n    WebhookResponse: The created webhook configuration\n\nExample:\n    ```json\n    {\n      \"url\": \"https://example.com/webhooks/calendar\",\n      \"events\": [\"task.created\", \"task.completed\"],\n      \"description\": \"Notify task management system\"\n    }\n    ```",
+        "operationId": "create_webhook_v1_webhooks_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/webhooks/{webhook_id}": {
+      "get": {
+        "tags": [
+          "Public API"
+        ],
+        "summary": "Get Webhook",
+        "description": "Get details of a specific webhook.\n\nRetrieve configuration and status information for a specific webhook subscription.\n\nArgs:\n    webhook_id: The unique identifier of the webhook\n\nReturns:\n    WebhookResponse: Webhook configuration details\n\nRaises:\n    HTTPException: 404 if webhook not found",
+        "operationId": "get_webhook_v1_webhooks__webhook_id__get",
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Webhook Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Public API"
+        ],
+        "summary": "Update Webhook",
+        "description": "Update a webhook configuration.\n\nModify the URL, events, or active status of an existing webhook subscription.\n\nArgs:\n    webhook_id: The unique identifier of the webhook\n    webhook_update: Fields to update\n\nReturns:\n    WebhookResponse: Updated webhook configuration\n\nRaises:\n    HTTPException: 404 if webhook not found",
+        "operationId": "update_webhook_v1_webhooks__webhook_id__patch",
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Webhook Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Public API"
+        ],
+        "summary": "Delete Webhook",
+        "description": "Delete a webhook subscription.\n\nPermanently removes a webhook subscription. You will no longer receive\nnotifications for the subscribed events.\n\nArgs:\n    webhook_id: The unique identifier of the webhook\n\nReturns:\n    SuccessResponse: Confirmation of deletion\n\nRaises:\n    HTTPException: 404 if webhook not found",
+        "operationId": "delete_webhook_v1_webhooks__webhook_id__delete",
+        "parameters": [
+          {
+            "name": "webhook_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Webhook Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/analytics": {
+      "get": {
+        "tags": [
+          "Public API"
+        ],
+        "summary": "Get Analytics",
+        "description": "Get usage analytics and statistics.\n\nRetrieve detailed analytics about your API usage, task/event activity, and\noverall account metrics.\n\n**Available Periods:**\n- `last_7_days` - Past week\n- `last_30_days` - Past month (default)\n- `last_90_days` - Past quarter\n- `current_month` - Current calendar month\n\nArgs:\n    period: Time period for analytics (default: \"last_30_days\")\n\nReturns:\n    AnalyticsResponse: Comprehensive analytics data\n\nExample Response:\n    ```json\n    {\n      \"account_id\": \"acc_123456\",\n      \"generated_at\": \"2025-11-13T10:30:00Z\",\n      \"usage\": {\n        \"tasks_created\": 145,\n        \"tasks_completed\": 98,\n        \"events_created\": 67,\n        \"api_calls\": 1523\n      }\n    }\n    ```",
+        "operationId": "get_analytics_v1_analytics_get",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "last_30_days",
+              "title": "Period"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/analytics/usage": {
+      "get": {
+        "tags": [
+          "Public API"
+        ],
+        "summary": "Get Usage Stats",
+        "description": "Get API usage statistics.\n\nRetrieve specific usage metrics for tasks, events, and API calls over a given period.\nThis endpoint is useful for monitoring your API quota and usage patterns.\n\nArgs:\n    period: Time period for statistics (default: \"last_30_days\")\n\nReturns:\n    UsageStats: Usage statistics for the specified period",
+        "operationId": "get_usage_stats_v1_analytics_usage_get",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "last_30_days",
+              "title": "Period"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageStats"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/account": {
+      "get": {
+        "tags": [
+          "Public API"
+        ],
+        "summary": "Get Account Info",
+        "description": "Get account information and subscription details.\n\nRetrieve information about your account including subscription plan,\nAPI quota, and usage limits.\n\nReturns:\n    AccountInfo: Account details and subscription information",
+        "operationId": "get_account_info_v1_account_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountInfo"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/health": {
+      "get": {
+        "tags": [
+          "Public API"
+        ],
+        "summary": "Public Api Health",
+        "description": "Health check endpoint for the public API.\n\nUse this endpoint to verify that the API is operational and responding to requests.\n\nReturns:\n    dict: API health status and version information",
+        "operationId": "public_api_health_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AccountInfo": {
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "title": "Account Id",
+            "description": "Unique account identifier"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "description": "Account email address"
+          },
+          "plan": {
+            "type": "string",
+            "title": "Plan",
+            "description": "Current subscription plan"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "When the account was created"
+          },
+          "api_quota": {
+            "type": "integer",
+            "title": "Api Quota",
+            "description": "API call quota per month"
+          },
+          "api_usage": {
+            "type": "integer",
+            "title": "Api Usage",
+            "description": "API calls used this month"
+          }
+        },
+        "type": "object",
+        "required": [
+          "account_id",
+          "email",
+          "plan",
+          "created_at",
+          "api_quota",
+          "api_usage"
+        ],
+        "title": "AccountInfo",
+        "description": "Schema for account information."
+      },
+      "AnalyticsResponse": {
+        "properties": {
+          "account_id": {
+            "type": "string",
+            "title": "Account Id",
+            "description": "Account identifier"
+          },
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At",
+            "description": "When this report was generated"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/UsageStats",
+            "description": "Usage statistics"
+          },
+          "top_categories": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Top Categories",
+            "description": "Most used categories/tags"
+          }
+        },
+        "type": "object",
+        "required": [
+          "account_id",
+          "generated_at",
+          "usage"
+        ],
+        "title": "AnalyticsResponse",
+        "description": "Schema for analytics data."
+      },
+      "ApiKeyCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name",
+            "description": "Friendly name for the API key"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/ApiKeyScope"
+            },
+            "type": "array",
+            "title": "Scopes",
+            "description": "List of permission scopes for this key"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At",
+            "description": "Optional expiration date for the key"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "scopes"
+        ],
+        "title": "ApiKeyCreate",
+        "description": "Schema for creating a new API key."
+      },
+      "ApiKeyListResponse": {
+        "properties": {
+          "keys": {
+            "items": {
+              "$ref": "#/components/schemas/ApiKeyResponse"
+            },
+            "type": "array",
+            "title": "Keys",
+            "description": "List of API keys"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Total number of keys"
+          }
+        },
+        "type": "object",
+        "required": [
+          "keys",
+          "total"
+        ],
+        "title": "ApiKeyListResponse",
+        "description": "Schema for listing API keys."
+      },
+      "ApiKeyResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique identifier for the API key"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Friendly name for the API key"
+          },
+          "key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Key",
+            "description": "The actual API key (only returned on creation)"
+          },
+          "key_prefix": {
+            "type": "string",
+            "title": "Key Prefix",
+            "description": "First 8 characters of the key for identification"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/ApiKeyScope"
+            },
+            "type": "array",
+            "title": "Scopes",
+            "description": "Permission scopes for this key"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "When the key was created"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At",
+            "description": "When the key expires"
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At",
+            "description": "Last time the key was used"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "description": "Whether the key is currently active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "key_prefix",
+          "scopes",
+          "created_at",
+          "is_active"
+        ],
+        "title": "ApiKeyResponse",
+        "description": "Schema for API key responses."
+      },
+      "ApiKeyScope": {
+        "type": "string",
+        "enum": [
+          "read",
+          "write",
+          "admin"
+        ],
+        "title": "ApiKeyScope",
+        "description": "Available scopes for API keys."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "SuccessResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Whether the operation was successful",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Success message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse",
+        "description": "Schema for generic success responses."
+      },
+      "UsageStats": {
+        "properties": {
+          "period": {
+            "type": "string",
+            "title": "Period",
+            "description": "Time period for these stats (e.g., 'last_30_days')"
+          },
+          "tasks_created": {
+            "type": "integer",
+            "title": "Tasks Created",
+            "description": "Number of tasks created"
+          },
+          "tasks_completed": {
+            "type": "integer",
+            "title": "Tasks Completed",
+            "description": "Number of tasks completed"
+          },
+          "events_created": {
+            "type": "integer",
+            "title": "Events Created",
+            "description": "Number of events created"
+          },
+          "api_calls": {
+            "type": "integer",
+            "title": "Api Calls",
+            "description": "Total number of API calls made"
+          },
+          "active_tasks": {
+            "type": "integer",
+            "title": "Active Tasks",
+            "description": "Current number of active tasks"
+          },
+          "upcoming_events": {
+            "type": "integer",
+            "title": "Upcoming Events",
+            "description": "Number of upcoming events"
+          }
+        },
+        "type": "object",
+        "required": [
+          "period",
+          "tasks_created",
+          "tasks_completed",
+          "events_created",
+          "api_calls",
+          "active_tasks",
+          "upcoming_events"
+        ],
+        "title": "UsageStats",
+        "description": "Schema for usage statistics."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WebhookCreate": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "maxLength": 2083,
+            "minLength": 1,
+            "format": "uri",
+            "title": "Url",
+            "description": "The URL to send webhook payloads to"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/WebhookEvent"
+            },
+            "type": "array",
+            "title": "Events",
+            "description": "List of events that trigger this webhook"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Optional description of the webhook"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "description": "Whether the webhook is active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "url",
+          "events"
+        ],
+        "title": "WebhookCreate",
+        "description": "Schema for creating a new webhook."
+      },
+      "WebhookEvent": {
+        "type": "string",
+        "enum": [
+          "task.created",
+          "task.updated",
+          "task.completed",
+          "task.deleted",
+          "event.created",
+          "event.updated",
+          "event.deleted"
+        ],
+        "title": "WebhookEvent",
+        "description": "Events that can trigger webhooks."
+      },
+      "WebhookListResponse": {
+        "properties": {
+          "webhooks": {
+            "items": {
+              "$ref": "#/components/schemas/WebhookResponse"
+            },
+            "type": "array",
+            "title": "Webhooks",
+            "description": "List of webhooks"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Total number of webhooks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "webhooks",
+          "total"
+        ],
+        "title": "WebhookListResponse",
+        "description": "Schema for listing webhooks."
+      },
+      "WebhookResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique identifier for the webhook"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL webhook payloads are sent to"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/WebhookEvent"
+            },
+            "type": "array",
+            "title": "Events",
+            "description": "Events that trigger this webhook"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Description of the webhook"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "description": "Whether the webhook is active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "When the webhook was created"
+          },
+          "last_triggered_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Triggered At",
+            "description": "Last time the webhook was triggered"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "url",
+          "events",
+          "is_active",
+          "created_at"
+        ],
+        "title": "WebhookResponse",
+        "description": "Schema for webhook responses."
+      },
+      "WebhookUpdate": {
+        "properties": {
+          "url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2083,
+                "minLength": 1,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url",
+            "description": "The URL to send webhook payloads to"
+          },
+          "events": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/WebhookEvent"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Events",
+            "description": "List of events that trigger this webhook"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Optional description"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active",
+            "description": "Whether the webhook is active"
+          }
+        },
+        "type": "object",
+        "title": "WebhookUpdate",
+        "description": "Schema for updating a webhook."
+      }
+    }
+  }
+}

@@ -11,27 +11,87 @@ from datetime import datetime
 from .database import engine, get_db, Base
 from .models import Item, ItemType
 from .schemas import TaskCreate, EventCreate, ItemUpdate, ItemResponse
+from .public_api import router as public_api_router
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
+# Main app with internal routes (not for external documentation)
 app = FastAPI(
-    title="Calendar & Todo API",
-    description="A simple API for managing tasks and calendar events",
-    version="1.0.0"
+    title="Mintie Calendar - Internal Application",
+    description="Internal application routes for the web interface",
+    version="1.0.0",
+    docs_url="/internal/docs",
+    redoc_url="/internal/redoc",
+    openapi_url="/internal/openapi.json"
 )
 
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+# Public API app (this is what gets documented for customers)
+public_app = FastAPI(
+    title="Mintie Calendar API",
+    description="""
+# Welcome to the Mintie Calendar API
+
+A powerful API for managing tasks and calendar events with webhooks, analytics, and more.
+
+## Authentication
+
+All API requests require authentication using an API key. Include your API key in the `Authorization` header:
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+Get your API key from the dashboard or create one using the `/v1/api-keys` endpoint.
+
+## Rate Limits
+
+- **Free Plan**: 1,000 requests/month
+- **Professional Plan**: 100,000 requests/month
+- **Enterprise Plan**: Unlimited
+
+## Webhooks
+
+Subscribe to real-time events using webhooks. See the webhooks section for configuration.
+
+## Support
+
+For support, contact support@example.com or visit our [documentation](https://docs.example.com).
+    """,
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
+    contact={
+        "name": "API Support",
+        "email": "support@example.com",
+        "url": "https://example.com/support"
+    },
+    license_info={
+        "name": "MIT",
+        "url": "https://opensource.org/licenses/MIT"
+    }
 )
 
-# Mount static files for frontend
+# Include the public API router
+public_app.include_router(public_api_router)
+
+# Configure CORS for both apps
+for application in [app, public_app]:
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+# Mount static files for frontend on internal app
 app.mount("/static", StaticFiles(directory="frontend", html=True), name="static")
+
+# Mount public API under /public path instead of /api to avoid conflicts
+# This way internal routes at /api/* work, and public API docs are at /public/*
+app.mount("/public", public_app)
 
 
 @app.get("/")
@@ -40,7 +100,7 @@ def root():
     Root endpoint that returns API information.
     """
     return {
-        "message": "Calendar & Todo API",
+        "message": "Mintie Calendar API",
         "version": "1.0.0",
         "docs": "/docs"
     }
