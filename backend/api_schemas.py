@@ -56,6 +56,11 @@ class ApiKeyListResponse(BaseModel):
     total: int = Field(..., description="Total number of keys")
 
 
+class ApiKeyUpdate(BaseModel):
+    """Schema for updating an API key."""
+    name: Optional[str] = Field(None, min_length=1, max_length=100, description="New friendly name for the API key")
+
+
 # Webhook Schemas
 class WebhookCreate(BaseModel):
     """Schema for creating a new webhook."""

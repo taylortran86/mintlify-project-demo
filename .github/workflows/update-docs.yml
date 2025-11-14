@@ -77,3 +77,65 @@ jobs:
             } catch (error) {
                 core.setFailed(`Failed to create documentation update job: ${error.message}`);
             }
+
+  sync-openapi-spec:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source repo
+        uses: actions/checkout@v4
+        with:
+          path: source
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Generate OpenAPI spec
+        working-directory: source
+        run: |
+          # Install dependencies
+          pip install -r requirements.txt
+
+          # Generate the OpenAPI spec from the running FastAPI app
+          python -c "
+          import json
+          from backend.main import public_app
+
+          spec = public_app.openapi()
+          with open('openapi.json', 'w') as f:
+              json.dump(spec, f, indent=2)
+          "
+
+      - name: Checkout target docs repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.DOCS_REPO }}
+          token: ${{ secrets.DOCS_REPO_TOKEN }}
+          path: docs
+
+      - name: Copy OpenAPI spec to docs repo
+        run: |
+          cp source/openapi.json docs/openapi.json
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          path: docs
+          token: ${{ secrets.DOCS_REPO_TOKEN }}
+          commit-message: "Update OpenAPI spec from ${{ github.repository }}@${{ github.sha }}"
+          branch: sync-openapi-spec-${{ github.run_number }}
+          title: "Update OpenAPI Specification"
+          body: |
+            ## OpenAPI Spec Update
+
+            This PR updates the OpenAPI specification from the source repository.
+
+            **Source Repository**: ${{ github.repository }}
+            **Source Commit**: ${{ github.sha }}
+            **Triggered by**: ${{ github.actor }}
+            **Workflow Run**: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            ### Changes
+            - Updated `openapi.json` with the latest API specification
+            - This includes any new endpoints, request/response schemas, and documentation updates

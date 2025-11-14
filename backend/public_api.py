@@ -12,6 +12,7 @@ from .api_schemas import (
     ApiKeyCreate,
     ApiKeyResponse,
     ApiKeyListResponse,
+    ApiKeyUpdate,
     WebhookCreate,
     WebhookUpdate,
     WebhookResponse,
@@ -177,6 +178,36 @@ def revoke_api_key(key_id: str) -> SuccessResponse:
 
     del api_keys_db[key_id]
     return SuccessResponse(success=True, message=f"API key {key_id} has been revoked")
+
+
+@router.patch("/api-keys/{key_id}", response_model=ApiKeyResponse, tags=["API Keys"])
+def update_api_key(key_id: str, key_update: ApiKeyUpdate) -> ApiKeyResponse:
+    """
+    Update an API key's properties.
+
+    Allows you to modify certain properties of an existing API key, such as its name.
+    Note that the actual key value and scopes cannot be changed after creation.
+
+    Args:
+        key_id: The unique identifier of the API key to update
+        key_update: The fields to update
+
+    Returns:
+        ApiKeyResponse: The updated API key information
+
+    Raises:
+        HTTPException: 404 if API key not found
+    """
+    if key_id not in api_keys_db:
+        raise HTTPException(status_code=404, detail="API key not found")
+
+    api_key = api_keys_db[key_id]
+    update_data = key_update.model_dump(exclude_unset=True)
+
+    for field, value in update_data.items():
+        api_key[field] = value
+
+    return ApiKeyResponse(**api_key)
 
 
 # Webhook Management Endpoints
