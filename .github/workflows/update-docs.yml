@@ -55,42 +55,53 @@ jobs:
               const decoder = new TextDecoder();
               let buffer = '';
               let textBuffer = '';
-              
+
               while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
-                
+
                 buffer += decoder.decode(value, { stream: true });
                 const lines = buffer.split('\n');
                 buffer = lines.pop() || '';
-                
+
                 for (const line of lines) {
                   if (!line.trim()) continue;
-                  
+
                   const colonIndex = line.indexOf(':');
                   if (colonIndex === -1) continue;
-                  
+
                   const prefix = line.substring(0, colonIndex);
                   const content = line.substring(colonIndex + 1);
-                  
-                  if (prefix === '0') {
-                    textBuffer += content;
-                  } else {
-                    if (textBuffer) {
+
+                  try {
+                    const parsed = JSON.parse(content);
+
+                    if (prefix === '0') {
+                      textBuffer += parsed;
+                    } else if (prefix === '9') {
+                      console.log(`→ ${parsed.toolName}`);
+                    } else if (prefix === 'a') {
+                      if (parsed.result?.success !== undefined) {
+                        console.log(`  ${parsed.result.success ? '✓' : '✗'} ${parsed.toolCallId}`);
+                      }
+                    } else if (prefix === 'e') {
+                      if (parsed.finishReason === 'stop') {
+                        console.log(`✓ Completed`);
+                      }
+                    } else if (prefix === 'd') {
+                      console.log(`Total tokens: ${parsed.usage.promptTokens + parsed.usage.completionTokens}`);
+                    }
+                  } catch (e) {
+                    if (textBuffer && prefix !== '0') {
                       console.log(textBuffer);
                       textBuffer = '';
                     }
-                    console.log(line);
                   }
                 }
               }
-              
+
               if (textBuffer) {
                 console.log(textBuffer);
-              }
-              
-              if (buffer.trim()) {
-                console.log(buffer);
               }
               
               core.notice(`Documentation update job triggered for ${owner}/${repo}`);
