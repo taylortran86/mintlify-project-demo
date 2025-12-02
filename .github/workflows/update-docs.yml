@@ -78,21 +78,29 @@ jobs:
 
                     if (prefix === '0') {
                       textBuffer += parsed;
-                    } else if (prefix === '9') {
-                      console.log(`→ ${parsed.toolName}`);
-                    } else if (prefix === 'a') {
-                      if (parsed.result?.success !== undefined) {
-                        console.log(`  ${parsed.result.success ? '✓' : '✗'} ${parsed.toolCallId}`);
+                    } else {
+                      // Flush text buffer before showing other events
+                      if (textBuffer) {
+                        console.log(textBuffer);
+                        textBuffer = '';
                       }
-                    } else if (prefix === 'e') {
-                      if (parsed.finishReason === 'stop') {
-                        console.log(`✓ Completed`);
+
+                      if (prefix === '9') {
+                        console.log(`→ ${parsed.toolName}`);
+                      } else if (prefix === 'a') {
+                        if (parsed.result?.success !== undefined) {
+                          console.log(`  ${parsed.result.success ? '✓' : '✗'} ${parsed.toolCallId}`);
+                        }
+                      } else if (prefix === 'e') {
+                        if (parsed.finishReason === 'stop') {
+                          console.log(`✓ Completed`);
+                        }
+                      } else if (prefix === 'd') {
+                        console.log(`Total tokens: ${parsed.usage.promptTokens + parsed.usage.completionTokens}`);
                       }
-                    } else if (prefix === 'd') {
-                      console.log(`Total tokens: ${parsed.usage.promptTokens + parsed.usage.completionTokens}`);
                     }
                   } catch (e) {
-                    if (textBuffer && prefix !== '0') {
+                    if (textBuffer) {
                       console.log(textBuffer);
                       textBuffer = '';
                     }
