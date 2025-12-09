@@ -47,6 +47,7 @@ async function loadTasks() {
         const response = await fetch(`${API_BASE_URL}/tasks`);
         const tasks = await response.json();
         displayTasks(tasks);
+        displayTaskStats(tasks);
     } catch (error) {
         console.error('Error loading tasks:', error);
         showError('Failed to load tasks');
@@ -93,6 +94,18 @@ function displayTasks(tasks) {
             </div>
         </div>
     `).join('');
+}
+
+function displayTaskStats(tasks) {
+    const totalTasks = tasks.length;
+    const completedTasks = tasks.filter(task => task.completed).length;
+    const activeTasks = totalTasks - completedTasks;
+    const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+    document.getElementById('totalTasks').textContent = totalTasks;
+    document.getElementById('activeTasks').textContent = activeTasks;
+    document.getElementById('completedTasks').textContent = completedTasks;
+    document.getElementById('completionRate').textContent = `${completionRate}%`;
 }
 
 async function createTask(event) {
