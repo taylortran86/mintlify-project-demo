@@ -37,6 +37,18 @@
         </section>
 
         <div class="main-content">
+            <!-- Events Section -->
+            <section class="events-section">
+                <div class="section-header">
+                    <h2>📆 Calendar Events</h2>
+                    <button class="btn btn-primary" onclick="showEventModal()">+ Add Event</button>
+                </div>
+
+                <div id="eventsList" class="items-list">
+                    <p class="empty-state">No events scheduled. Add one to your calendar!</p>
+                </div>
+            </section>
+
             <!-- Tasks Section -->
             <section class="tasks-section">
                 <div class="section-header">
@@ -52,18 +64,6 @@
 
                 <div id="tasksList" class="items-list">
                     <p class="empty-state">No tasks yet. Create one to get started!</p>
-                </div>
-            </section>
-
-            <!-- Events Section -->
-            <section class="events-section">
-                <div class="section-header">
-                    <h2>📆 Calendar Events</h2>
-                    <button class="btn btn-primary" onclick="showEventModal()">+ Add Event</button>
-                </div>
-
-                <div id="eventsList" class="items-list">
-                    <p class="empty-state">No events scheduled. Add one to your calendar!</p>
                 </div>
             </section>
         </div>
