@@ -1,41 +1,64 @@
-name: Daily Demo Reset & Merge
+name: Daily Demo PRs
+
 on:
   schedule:
+    # 6AM PST = 14:00 UTC
     - cron: "0 14 * * *"
   workflow_dispatch:
+
 permissions:
   contents: write
   pull-requests: write
+
 jobs:
-  demo-cycle:
+  daily-demo-prs:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout main
+      # Checkout repo
+      - name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
-      - name: Configure Git identity
+
+      # Configure Git
+      - name: Configure Git
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
-      
-      - name: Fetch latest
-        run: git fetch origin
-      
-      - name: Reset main to DEMO_BASELINE (UNMERGE PRs)
+
+      # Reset main to DEMO_BASELINE (unmerge previous PRs)
+      - name: Reset main to DEMO_BASELINE
         run: |
+          git fetch --all
           git checkout main
           git reset --hard DEMO_BASELINE
           git push --force origin main
-      
+
+      # Authenticate GitHub CLI
       - name: Authenticate GitHub CLI
         run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
-      
-      - name: Re-merge PR 1
+
+      # Create new PRs from demo branches
+      - name: Create new PRs
         run: |
-          gh pr merge 1--merge --admin --repo ${{ github.repository }}
-      
-      - name: Re-merge PR 2
+          gh pr create --base main --head feature/task-statistics \
+            --title "Daily Demo PR: task-statistics" \
+            --body "Automatically generated PR for daily demo" \
+            --repo ${{ github.repository }}
+
+          gh pr create --base main --head feature/navigation-refactor \
+            --title "Daily Demo PR: navigation-refactor" \
+            --body "Automatically generated PR for daily demo" \
+            --repo ${{ github.repository }}
+
+      # Auto-merge the new PRs immediately
+      - name: Auto-merge the PRs
         run: |
-          gh pr merge 2 --merge --admin --repo ${{ github.repository }}
+          # Find the newly created PR numbers
+          PR1=$(gh pr list --state open --head feature/task-statistics --json number -q '.[0].number')
+          PR2=$(gh pr list --state open --head feature/navigation-refactor --json number -q '.[0].number')
+
+          # Merge them
+          gh pr merge $PR1 --merge --admin
+          gh pr merge $PR2 --merge --admin
