@@ -42,12 +42,12 @@ jobs:
       # Create new PRs from demo branches
       - name: Create new PRs
         run: |
-          gh pr create --base main --head feature/task-statistics-demo \
+          gh pr create --base main --head feature/task-statistics \
             --title "Daily Demo PR: task-statistics" \
             --body "Automatically generated PR for daily demo" \
             --repo ${{ github.repository }}
 
-          gh pr create --base main --head feature/navigation-refactor-demo \
+          gh pr create --base main --head feature/navigation-refactor \
             --title "Daily Demo PR: navigation-refactor" \
             --body "Automatically generated PR for daily demo" \
             --repo ${{ github.repository }}
